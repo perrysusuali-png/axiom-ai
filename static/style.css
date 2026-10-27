@@ -1,13 +1,13 @@
 :root {
     color-scheme: dark;
-    --bg: #101116;
-    --panel: #15161d;
-    --panel-soft: #1b1c24;
-    --border: #292a34;
-    --text: #f1f0f7;
-    --muted: #9696a7;
-    --accent: #a99aff;
-    --accent-strong: #8874f7;
+    --bg: #111713;
+    --panel: #171F19;
+    --panel-soft: #202922;
+    --border: #344036;
+    --text: #F2F0E6;
+    --muted: #A1ADA0;
+    --accent: #C7FF4A;
+    --accent-strong: #A7E52D;
 }
 
 * {
@@ -50,7 +50,7 @@ textarea:focus-visible {
     flex-direction: column;
     min-height: 100vh;
     padding: 24px 16px 18px;
-    background: #14151b;
+    background: #151D17;
     border-right: 1px solid var(--border);
 }
 
@@ -63,13 +63,14 @@ textarea:focus-visible {
 }
 
 .brand-mark {
+    color: #18200D;
     display: grid;
     width: 39px;
     height: 39px;
     place-items: center;
-    border: 1px solid #7c6de0;
+    border: 1px solid #708D3D;
     border-radius: 13px;
-    background: linear-gradient(145deg, #6d5bd0, #31284f);
+    background: linear-gradient(145deg, #C7FF4A, #647D30);
     font-size: 22px;
     font-weight: 750;
 }
@@ -94,7 +95,7 @@ textarea:focus-visible {
     border: 1px solid var(--border);
     border-radius: 10px;
     background: transparent;
-    color: #c7c5d5;
+    color: #D4DDD0;
 }
 
 .mobile-close {
@@ -103,21 +104,22 @@ textarea:focus-visible {
 }
 
 .new-chat-button {
+    color: #18200D;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 9px;
     width: 100%;
     min-height: 44px;
-    border: 1px solid #7969dc;
+    border: 1px solid #A7E52D;
     border-radius: 12px;
-    background: #7664db;
+    background: #C7FF4A;
     font-weight: 650;
     transition: background .2s, transform .2s;
 }
 
 .new-chat-button:hover {
-    background: #8878ed;
+    background: #D5FF79;
     transform: translateY(-1px);
 }
 
@@ -127,7 +129,7 @@ textarea:focus-visible {
 
 .sidebar-label {
     margin: 30px 8px 12px;
-    color: #77788a;
+    color: #849184;
     font-size: 10px;
     font-weight: 750;
     letter-spacing: 1.2px;
@@ -169,7 +171,7 @@ textarea:focus-visible {
 
 .history-empty {
     padding: 8px;
-    color: #747586;
+    color: #849184;
     font-size: 12px;
     line-height: 1.6;
 }
@@ -208,7 +210,7 @@ textarea:focus-visible {
     padding: 0;
     border: 0;
     background: none;
-    color: #b0a4ff;
+    color: #C7FF4A;
     font-size: 12px;
 }
 
@@ -336,8 +338,8 @@ textarea:focus-visible {
 }
 
 .suggestion:hover {
-    border-color: #6355a5;
-    background: #1c1b29;
+    border-color: var(--accent);
+    background: var(--panel-soft);
 }
 
 .suggestion-icon {
@@ -346,10 +348,10 @@ textarea:focus-visible {
     width: 35px;
     height: 35px;
     place-items: center;
-    border: 1px solid #343044;
+    border: 1px solid var(--border);
     border-radius: 10px;
-    background: #242133;
-    color: #b7aaff;
+    background: var(--panel-soft);
+    color: var(--accent);
     font-size: 18px;
 }
 
@@ -537,13 +539,13 @@ textarea:focus-visible {
     border: 0;
     border-radius: 11px;
     background: var(--accent-strong);
-    color: white;
+    color: #18200D;
     font-size: 22px;
     transition: background .2s;
 }
 
 .send-button:hover {
-    background: #9a8aff;
+    background: #D5FF79;
 }
 
 .send-button:disabled {
@@ -553,7 +555,7 @@ textarea:focus-visible {
 
 .disclaimer {
     margin: 10px 0 0;
-    color: #747486;
+    color: var(--muted);
     font-size: 10px;
     text-align: center;
 }
@@ -786,10 +788,10 @@ textarea:focus-visible {
 /* AXIOM AI — 3D DEPTH THEME */
 
 :root {
-    --axiom-purple: #9b6cff;
-    --axiom-cyan: #59e5ff;
-    --axiom-surface: #171622;
-    --axiom-edge: rgba(177, 139, 255, 0.24);
+    --axiom-purple: #C7FF4A;
+    --axiom-cyan: #D5FF79;
+    --axiom-surface: #202922;
+    --axiom-edge: rgba(199, 255, 74, 0.24);
 }
 
 /* Give the application a sense of depth */
@@ -822,7 +824,7 @@ textarea:focus-visible {
 /* Brand glow */
 .brand,
 .topbar-title {
-    text-shadow: 0 0 18px rgba(155, 108, 255, 0.22);
+    text-shadow: 0 0 18px rgba(199, 255, 74, 0.22);
 }
 
 /* Raised, tactile buttons */
@@ -855,11 +857,11 @@ textarea:focus-visible {
 .utility-button:hover,
 .icon-button:hover {
     transform: translateY(-3px) rotateX(2deg);
-    border-color: rgba(155, 108, 255, 0.55);
+    border-color: rgba(199, 255, 74, 0.55);
     box-shadow:
         0 7px 0 rgba(0, 0, 0, 0.22),
-        0 12px 28px rgba(104, 65, 200, 0.2),
-        0 0 18px rgba(155, 108, 255, 0.08);
+        0 12px 28px rgba(100, 130, 35, 0.2),
+        0 0 18px rgba(199, 255, 74, 0.08);
 }
 
 .new-chat-button:active,
@@ -871,21 +873,22 @@ textarea:focus-visible {
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 
-/* Purple 3D send button */
+/* Obsidian Signal 3D send button */
 .send-button {
-    background: linear-gradient(145deg, #b18aff, #7645d5);
-    border: 1px solid rgba(220, 200, 255, 0.42);
+    background: linear-gradient(145deg, #D5FF79, #A7E52D);
+    color: #18200D;
+    border: 1px solid rgba(199, 255, 74, 0.42);
     box-shadow:
-        0 4px 0 #4d2b91,
-        0 8px 22px rgba(126, 73, 220, 0.3),
+        0 4px 0 #526D24,
+        0 8px 22px rgba(130, 170, 45, 0.22),
         inset 0 1px 1px rgba(255, 255, 255, 0.38);
 }
 
 .send-button:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 6px 0 #4d2b91,
-        0 12px 28px rgba(126, 73, 220, 0.4),
+        0 6px 0 #526D24,
+        0 12px 28px rgba(130, 170, 45, 0.3),
         inset 0 1px 1px rgba(255, 255, 255, 0.38);
 }
 
@@ -894,16 +897,16 @@ textarea:focus-visible {
     border: 1px solid var(--axiom-edge);
     box-shadow:
         0 10px 35px rgba(0, 0, 0, 0.2),
-        0 0 0 1px rgba(155, 108, 255, 0.035),
+        0 0 0 1px rgba(199, 255, 74, 0.035),
         inset 0 1px rgba(255, 255, 255, 0.035);
     transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .composer:focus-within {
-    border-color: rgba(155, 108, 255, 0.62);
+    border-color: rgba(199, 255, 74, 0.62);
     box-shadow:
         0 12px 38px rgba(0, 0, 0, 0.24),
-        0 0 24px rgba(155, 108, 255, 0.09),
+        0 0 24px rgba(199, 255, 74, 0.09),
         inset 0 1px rgba(255, 255, 255, 0.045);
 }
 
@@ -998,9 +1001,9 @@ textarea:focus-visible {
 
 .utility-button:hover:not(:disabled) {
     transform: translateY(-2px);
-    border-color: rgba(176, 139, 255, 0.7);
-    background: linear-gradient(145deg, #35264e, #211a30);
-    box-shadow: 0 5px 18px rgba(139, 92, 246, 0.2);
+    border-color: rgba(199, 255, 74, 0.7);
+    background: linear-gradient(145deg, #303D25, #202922);
+    box-shadow: 0 5px 18px rgba(130, 170, 45, 0.2);
 }
 
 .utility-button:active:not(:disabled) {
@@ -1009,15 +1012,15 @@ textarea:focus-visible {
 
 .utility-button:focus-visible,
 .send-button:focus-visible {
-    outline: 2px solid #b89aff;
+    outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
 
 .utility-button.utility-active {
-    color: #ffffff;
-    background: linear-gradient(145deg, #a879ff, #7443d5);
-    border-color: #c4a8ff;
-    box-shadow: 0 0 20px rgba(155, 108, 255, 0.4);
+    color: #18200D;
+    background: linear-gradient(145deg, #D5FF79, #A7E52D);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(199, 255, 74, 0.3);
     animation: axiom-voice-pulse 1.5s ease-in-out infinite;
 }
 
@@ -1028,8 +1031,8 @@ textarea:focus-visible {
 }
 
 @keyframes axiom-voice-pulse {
-    0%, 100% { box-shadow: 0 0 10px rgba(155, 108, 255, 0.2); }
-    50% { box-shadow: 0 0 23px rgba(155, 108, 255, 0.55); }
+    0%, 100% { box-shadow: 0 0 10px rgba(199, 255, 74, 0.2); }
+    50% { box-shadow: 0 0 23px rgba(199, 255, 74, 0.4); }
 }
 
 @media (max-width: 520px) {

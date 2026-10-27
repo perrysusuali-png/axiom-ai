@@ -17,7 +17,7 @@ GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 MAX_MESSAGE_LENGTH = 4000
 MAX_HISTORY_MESSAGES = 12
 MAX_HISTORY_CHARS = 12000
-MAX_REQUEST_BYTES = 64 * 1024
+MAX_REQUEST_BYTES = 9 * 1024 * 1024
 MODEL_TIMEOUT = 90
 MIN_REQUEST_INTERVAL = 2
 RATE_LIMIT_WINDOW = 60
@@ -423,6 +423,90 @@ def chat():
 
     finally:
         model_semaphore.release()
+
+
+@app.route("/api/transcribe", methods=["POST"])
+def transcribe():
+    client_id = request.remote_addr or "unknown"
+
+    if is_rate_limited(client_id):
+        return jsonify({
+            "error": "Please wait a moment before recording again."
+        }), 429
+
+    audio = request.files.get("audio")
+    if audio is None or not audio.filename:
+        return jsonify({"error": "No audio recording was received."}), 400
+
+    allowed_types = {
+        "audio/webm",
+        "audio/ogg",
+        "audio/wav",
+        "audio/mpeg",
+        "audio/mp4",
+        "audio/x-wav",
+        "video/webm",
+    }
+    content_type = (audio.mimetype or "").lower()
+    if content_type not in allowed_types:
+        return jsonify({
+            "error": "Unsupported audio format. Please try recording again."
+        }), 415
+
+    audio_bytes = audio.read(8 * 1024 * 1024 + 1)
+    if not audio_bytes:
+        return jsonify({"error": "The audio recording is empty."}), 400
+    if len(audio_bytes) > 8 * 1024 * 1024:
+        return jsonify({"error": "Audio recordings must be 8 MB or smaller."}), 413
+
+    api_key = os.environ.get("GROQ_API_KEY", "").strip()
+    if not api_key:
+        app.logger.error("GROQ_API_KEY is not configured.")
+        return jsonify({"error": "The AI service is not configured yet."}), 503
+
+    try:
+        response = requests.post(
+            "https://api.groq.com/openai/v1/audio/transcriptions",
+            headers={"Authorization": f"Bearer {api_key}"},
+            files={
+                "file": (
+                    audio.filename or "recording.webm",
+                    audio_bytes,
+                    content_type,
+                )
+            },
+            data={"model": "whisper-large-v3-turbo"},
+            timeout=60,
+        )
+
+        if response.status_code == 429:
+            return jsonify({
+                "error": "The transcription service is busy or has reached a usage limit."
+            }), 429
+
+        response.raise_for_status()
+        result = response.json()
+        transcript = result.get("text")
+
+        if not isinstance(transcript, str) or not transcript.strip():
+            return jsonify({"error": "No speech was detected in the recording."}), 422
+
+        return jsonify({"text": transcript.strip()}), 200
+
+    except requests.Timeout:
+        return jsonify({
+            "error": "Audio transcription took too long. Please try again."
+        }), 504
+    except requests.RequestException:
+        app.logger.exception("Groq audio transcription request failed.")
+        return jsonify({
+            "error": "Audio transcription is temporarily unavailable."
+        }), 502
+    except ValueError:
+        app.logger.exception("Groq returned invalid transcription JSON.")
+        return jsonify({
+            "error": "The transcription service returned an invalid response."
+        }), 502
 
 
 if __name__ == "__main__":

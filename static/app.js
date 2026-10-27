@@ -10,6 +10,9 @@ const elements = {
     chatForm: document.getElementById("chatForm"),
     messageInput: document.getElementById("messageInput"),
     sendButton: document.getElementById("sendButton"),
+    voiceButton: document.getElementById("voiceButton"),
+    speakButton: document.getElementById("speakButton"),
+    stopSpeakingButton: document.getElementById("stopSpeakingButton"),
     errorMessage: document.getElementById("errorMessage"),
     toast: document.getElementById("toast")
 };
@@ -466,6 +469,173 @@ window.addEventListener("storage", event => {
         renderConversation();
     }
 });
+
+
+let mediaRecorder = null;
+let recordedChunks = [];
+let isListening = false;
+
+async function startVoiceRecording() {
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+        showToast("Audio recording is not supported in this browser.");
+        return;
+    }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const preferredType = [
+            "audio/webm;codecs=opus",
+            "audio/webm",
+            "audio/ogg;codecs=opus",
+            "audio/mp4"
+        ].find(type => MediaRecorder.isTypeSupported(type));
+
+        mediaRecorder = preferredType
+            ? new MediaRecorder(stream, { mimeType: preferredType })
+            : new MediaRecorder(stream);
+
+        recordedChunks = [];
+
+        mediaRecorder.addEventListener("dataavailable", event => {
+            if (event.data && event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        });
+
+        mediaRecorder.addEventListener("error", () => {
+            stream.getTracks().forEach(track => track.stop());
+            isListening = false;
+            elements.voiceButton.classList.remove("utility-active");
+            showToast("Recording failed. Please try again.");
+        });
+
+        mediaRecorder.addEventListener("stop", async () => {
+            stream.getTracks().forEach(track => track.stop());
+            isListening = false;
+            elements.voiceButton.classList.remove("utility-active");
+
+            if (!recordedChunks.length) {
+                showToast("No audio was recorded. Please try again.");
+                return;
+            }
+
+            const mimeType = mediaRecorder.mimeType || "audio/webm";
+            const extension = mimeType.includes("ogg") ? "ogg"
+                : mimeType.includes("mp4") ? "mp4"
+                : mimeType.includes("wav") ? "wav"
+                : "webm";
+
+            const audioBlob = new Blob(recordedChunks, { type: mimeType });
+            if (audioBlob.size > 8 * 1024 * 1024) {
+                showToast("Recording is too large. Please record a shorter message.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("audio", audioBlob, `recording.${extension}`);
+
+            showToast("Transcribing your voice…");
+
+            try {
+                const response = await fetch("/api/transcribe", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    showToast(result.error || "Transcription failed. Please try again.");
+                    return;
+                }
+
+                const transcript = typeof result.text === "string"
+                    ? result.text.trim()
+                    : "";
+
+                if (!transcript) {
+                    showToast("No speech was detected. Please try again.");
+                    return;
+                }
+
+                const existing = elements.messageInput.value.trim();
+                elements.messageInput.value = existing
+                    ? `${existing} ${transcript}`
+                    : transcript;
+                resizeInput();
+                elements.messageInput.focus();
+                showToast("Voice message added. Review it before sending.");
+            } catch {
+                showToast("Could not reach the transcription service. Check your connection.");
+            }
+        });
+
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+
+        mediaRecorder.start();
+        isListening = true;
+        elements.voiceButton.classList.add("utility-active");
+        showToast("Recording. Click the microphone again to finish.");
+    } catch (error) {
+        if (error.name === "NotAllowedError" || error.name === "SecurityError") {
+            showToast("Microphone permission denied. Check browser permissions.");
+        } else if (error.name === "NotFoundError") {
+            showToast("No microphone was found on this device.");
+        } else {
+            showToast("Could not start recording. Check microphone access.");
+        }
+    }
+}
+
+elements.voiceButton.addEventListener("click", () => {
+    if (isListening && mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        return;
+    }
+
+    if (!isListening) {
+        startVoiceRecording();
+    }
+});
+
+elements.speakButton.addEventListener("click", () => {
+    if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+        showToast("Read-aloud is not supported in this browser.");
+        return;
+    }
+
+    const conversation = activeConversation();
+    const lastReply = conversation
+        ? [...conversation.messages].reverse().find(item =>
+            item.role === "assistant" && typeof item.content === "string" && item.content.trim()
+        )
+        : null;
+
+    if (!lastReply) {
+        showToast("There is no Axiom AI response to read yet.");
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(lastReply.content);
+    utterance.lang = navigator.language || "en-US";
+    utterance.rate = 1;
+    utterance.pitch = 1;
+
+    utterance.onerror = () => showToast("The browser could not read this response aloud.");
+    window.speechSynthesis.speak(utterance);
+});
+
+elements.stopSpeakingButton.addEventListener("click", () => {
+    if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        showToast("Read-aloud stopped.");
+    }
+});
+
+setupVoiceInput();
 
 renderHistory();
 renderConversation();
