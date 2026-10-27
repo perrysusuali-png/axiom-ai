@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101116">
+    <meta name="description" content="Axiom AI is a free AI assistant powered by a locally hosted model.">
+    <title>Axiom AI — Your AI Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-mark">A</div>
+                <div>
+                    <div class="brand-name">Axiom AI</div>
+                    <div class="brand-subtitle">Your thinking space</div>
+                </div>
+                <button class="icon-button mobile-close" id="closeSidebar" aria-label="Close sidebar">×</button>
+            </div>
+
+            <button class="new-chat-button" id="newChat">
+                <span>＋</span> New chat
+            </button>
+
+            <div class="sidebar-label">YOUR CONVERSATIONS</div>
+            <div class="history-list" id="historyList"></div>
+
+            <div class="sidebar-footer">
+                <div class="local-indicator"><span></span> Local model</div>
+                <p>Your chat history stays in this browser.</p>
+                <button class="clear-history" id="clearHistory">Clear all history</button>
+            </div>
+        </aside>
+
+        <main class="main-panel">
+            <header class="topbar">
+                <button class="icon-button menu-button" id="openSidebar" aria-label="Open sidebar">☰</button>
+                <div class="topbar-title">Axiom <span>AI</span></div>
+                <div class="model-badge"><span></span> Qwen 0.5B</div>
+            </header>
+
+            <section class="chat-area" id="chatArea">
+                <div class="welcome" id="welcome">
+                    <div class="welcome-symbol">✳</div>
+                    <div class="eyebrow">YOUR PERSONAL AI SPACE</div>
+                    <h1>Think clearly.<br><span>Build boldly.</span></h1>
+                    <p>Ask questions, explore ideas, learn new skills, or work through a problem with Axiom AI.</p>
+
+                    <div class="suggestions">
+                        <button class="suggestion" data-prompt="Teach me a useful cybersecurity concept for beginners.">
+                            <span class="suggestion-icon">⌘</span>
+                            <span><strong>Learn something</strong><small>Explore cybersecurity concepts</small></span>
+                            <span class="suggestion-arrow">↗</span>
+                        </button>
+                        <button class="suggestion" data-prompt="Help me write a simple Python program and explain how it works.">
+                            <span class="suggestion-icon">⌁</span>
+                            <span><strong>Write some code</strong><small>Build and understand a program</small></span>
+                            <span class="suggestion-arrow">↗</span>
+                        </button>
+                        <button class="suggestion" data-prompt="Help me develop a practical plan for a new project.">
+                            <span class="suggestion-icon">◇</span>
+                            <span><strong>Plan an idea</strong><small>Turn an idea into clear steps</small></span>
+                            <span class="suggestion-arrow">↗</span>
+                        </button>
+                        <button class="suggestion" data-prompt="Explain a difficult topic in simple language.">
+                            <span class="suggestion-icon">◎</span>
+                            <span><strong>Understand a topic</strong><small>Make complex ideas simpler</small></span>
+                            <span class="suggestion-arrow">↗</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="messages" id="messages" aria-live="polite"></div>
+            </section>
+
+            <section class="composer-section">
+                <div class="error-message" id="errorMessage" role="alert"></div>
+                <form class="composer" id="chatForm">
+                    <textarea id="messageInput" rows="1" maxlength="4000" placeholder="Message Axiom AI..." aria-label="Your message"></textarea>
+                    <div class="composer-bottom">
+                        <div class="composer-note"><span>✳</span> Powered by a local AI model</div>
+                        <button class="send-button" id="sendButton" type="submit" aria-label="Send message">
+                            <span>↑</span>
+                        </button>
+                    </div>
+                </form>
+                <p class="disclaimer">AI can make mistakes. Check important information independently.</p>
+            </section>
+        </main>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>
