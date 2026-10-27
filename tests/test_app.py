@@ -1,3 +1,4 @@
+import os
 from unittest.mock import Mock, patch
 
 import pytest
@@ -9,7 +10,7 @@ from app import app, client_requests, rate_lock, MODEL
 @pytest.fixture
 def client():
     app.config["TESTING"] = True
-
+    os.environ["GROQ_API_KEY"] = "test-key-not-real"
     with rate_lock:
         client_requests.clear()
 
@@ -132,13 +133,15 @@ def test_model_connection_error_returns_502(client):
 
 def test_successful_model_response(client):
     mocked_response = Mock()
-    mocked_response.raise_for_status.return_value = None
     mocked_response.json.return_value = {
-        "message": {
-            "content": "Phishing is a deceptive attempt to steal information."
-        }
+        "choices": [
+            {
+                "message": {
+                    "content": "Phishing is a deceptive attempt to steal information."
+                }
+            }
+        ]
     }
-
     with patch("app.requests.post", return_value=mocked_response):
         response = client.post(
             "/api/chat",
