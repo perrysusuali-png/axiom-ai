@@ -727,3 +727,332 @@ textarea:focus-visible {
         transition-duration: .01ms !important;
     }
 }
+
+
+.composer-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.utility-button {
+    display: grid;
+    flex: 0 0 35px;
+    width: 35px;
+    height: 35px;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #22222d;
+    color: var(--text);
+    font-size: 15px;
+    transition: background .2s, border-color .2s;
+}
+
+.utility-button:hover,
+.utility-button.utility-active {
+    border-color: #7264bd;
+    background: #302b46;
+}
+
+.utility-button:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
+@media (max-width: 480px) {
+    .composer-bottom {
+        align-items: flex-end;
+        gap: 8px;
+    }
+
+    .composer-note {
+        max-width: 105px;
+        line-height: 1.5;
+    }
+
+    .composer-actions {
+        gap: 5px;
+    }
+
+    .utility-button,
+    .send-button {
+        flex-basis: 32px;
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* AXIOM AI — 3D DEPTH THEME */
+
+:root {
+    --axiom-purple: #9b6cff;
+    --axiom-cyan: #59e5ff;
+    --axiom-surface: #171622;
+    --axiom-edge: rgba(177, 139, 255, 0.24);
+}
+
+/* Give the application a sense of depth */
+.app-shell {
+    perspective: 1400px;
+    background:
+        radial-gradient(ellipse at 75% 10%, rgba(120, 67, 210, 0.13), transparent 40%),
+        radial-gradient(ellipse at 10% 90%, rgba(45, 155, 210, 0.08), transparent 35%),
+        var(--bg, #101116);
+}
+
+/* Floating glass-like sidebar */
+.sidebar {
+    position: relative;
+    z-index: 2;
+    border-right: 1px solid var(--axiom-edge);
+    box-shadow:
+        8px 0 30px rgba(0, 0, 0, 0.24),
+        inset -1px 0 rgba(255, 255, 255, 0.025);
+}
+
+/* Main panel gains subtle dimensional lighting */
+.main-panel {
+    position: relative;
+    isolation: isolate;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(151, 101, 255, 0.045), transparent 55%);
+}
+
+/* Brand glow */
+.brand,
+.topbar-title {
+    text-shadow: 0 0 18px rgba(155, 108, 255, 0.22);
+}
+
+/* Raised, tactile buttons */
+.new-chat-button,
+.send-button,
+.utility-button,
+.suggestion,
+.icon-button,
+.clear-history {
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease,
+        background-color 180ms ease;
+    transform-style: preserve-3d;
+}
+
+.new-chat-button,
+.suggestion,
+.utility-button,
+.icon-button {
+    box-shadow:
+        0 4px 0 rgba(0, 0, 0, 0.24),
+        0 8px 20px rgba(0, 0, 0, 0.16),
+        inset 0 1px rgba(255, 255, 255, 0.055);
+}
+
+.new-chat-button:hover,
+.suggestion:hover,
+.utility-button:hover,
+.icon-button:hover {
+    transform: translateY(-3px) rotateX(2deg);
+    border-color: rgba(155, 108, 255, 0.55);
+    box-shadow:
+        0 7px 0 rgba(0, 0, 0, 0.22),
+        0 12px 28px rgba(104, 65, 200, 0.2),
+        0 0 18px rgba(155, 108, 255, 0.08);
+}
+
+.new-chat-button:active,
+.suggestion:active,
+.utility-button:active,
+.icon-button:active,
+.send-button:active {
+    transform: translateY(2px) scale(0.98);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* Purple 3D send button */
+.send-button {
+    background: linear-gradient(145deg, #b18aff, #7645d5);
+    border: 1px solid rgba(220, 200, 255, 0.42);
+    box-shadow:
+        0 4px 0 #4d2b91,
+        0 8px 22px rgba(126, 73, 220, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.38);
+}
+
+.send-button:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px 0 #4d2b91,
+        0 12px 28px rgba(126, 73, 220, 0.4),
+        inset 0 1px 1px rgba(255, 255, 255, 0.38);
+}
+
+/* Layered composer */
+.composer {
+    border: 1px solid var(--axiom-edge);
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(155, 108, 255, 0.035),
+        inset 0 1px rgba(255, 255, 255, 0.035);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.composer:focus-within {
+    border-color: rgba(155, 108, 255, 0.62);
+    box-shadow:
+        0 12px 38px rgba(0, 0, 0, 0.24),
+        0 0 24px rgba(155, 108, 255, 0.09),
+        inset 0 1px rgba(255, 255, 255, 0.045);
+}
+
+/* Raised welcome suggestions */
+.suggestion {
+    background-image: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.025),
+        transparent 65%
+    );
+}
+
+/* Message cards */
+.message {
+    animation: axiom-rise-in 320ms ease both;
+}
+
+@keyframes axiom-rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px) perspective(600px) rotateX(-1deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) perspective(600px) rotateX(0);
+    }
+}
+
+/* Subtle luminous borders */
+.model-badge {
+    box-shadow: 0 0 16px rgba(89, 229, 255, 0.055);
+}
+
+/* Keep animations comfortable and accessible */
+@media (prefers-reduced-motion: reduce) {
+    .message {
+        animation: none;
+    }
+
+    .new-chat-button,
+    .send-button,
+    .utility-button,
+    .suggestion,
+    .icon-button,
+    .clear-history {
+        transition: none;
+    }
+
+    .new-chat-button:hover,
+    .suggestion:hover,
+    .utility-button:hover,
+    .icon-button:hover,
+    .send-button:hover {
+        transform: none;
+    }
+}
+
+
+
+/* AXIOM VOICE CONTROLS — CHATGPT-INSPIRED */
+.composer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.utility-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid rgba(190, 170, 255, 0.2);
+    border-radius: 50%;
+    color: #e9e2ff;
+    background: linear-gradient(145deg, #262332, #191720);
+    cursor: pointer;
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.2),
+        inset 0 1px rgba(255, 255, 255, 0.07);
+    transition: transform 180ms ease, background 180ms ease,
+        border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.utility-button svg {
+    display: block;
+    width: 21px;
+    height: 21px;
+}
+
+.utility-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: rgba(176, 139, 255, 0.7);
+    background: linear-gradient(145deg, #35264e, #211a30);
+    box-shadow: 0 5px 18px rgba(139, 92, 246, 0.2);
+}
+
+.utility-button:active:not(:disabled) {
+    transform: scale(0.94);
+}
+
+.utility-button:focus-visible,
+.send-button:focus-visible {
+    outline: 2px solid #b89aff;
+    outline-offset: 3px;
+}
+
+.utility-button.utility-active {
+    color: #ffffff;
+    background: linear-gradient(145deg, #a879ff, #7443d5);
+    border-color: #c4a8ff;
+    box-shadow: 0 0 20px rgba(155, 108, 255, 0.4);
+    animation: axiom-voice-pulse 1.5s ease-in-out infinite;
+}
+
+.utility-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@keyframes axiom-voice-pulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(155, 108, 255, 0.2); }
+    50% { box-shadow: 0 0 23px rgba(155, 108, 255, 0.55); }
+}
+
+@media (max-width: 520px) {
+    .composer-actions {
+        gap: 5px;
+    }
+
+    .utility-button {
+        flex-basis: 36px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .utility-button svg {
+        width: 19px;
+        height: 19px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .utility-button,
+    .utility-button.utility-active {
+        animation: none;
+        transition: none;
+    }
+}

@@ -80,10 +80,15 @@
                 <form class="composer" id="chatForm">
                     <textarea id="messageInput" rows="1" maxlength="4000" placeholder="Message Axiom AI..." aria-label="Your message"></textarea>
                     <div class="composer-bottom">
-                        <div class="composer-note"><span>✳</span> Powered by a local AI model</div>
-                        <button class="send-button" id="sendButton" type="submit" aria-label="Send message">
-                            <span>↑</span>
-                        </button>
+                        <div class="composer-note"><span>✳</span> Powered by Axiom AI</div>
+                        <div class="composer-actions">
+                            <button class="utility-button" id="voiceButton" type="button" aria-label="Dictate a message" title="Dictate a message"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21m-4 0h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+                            <button class="utility-button" id="speakButton" type="button" aria-label="Read the latest answer aloud" title="Read the latest answer aloud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 9a5 5 0 0 1 0 6m2.5-8.5a8.5 8.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+                            <button class="utility-button" id="stopSpeakingButton" type="button" aria-label="Stop speaking" title="Stop speaking"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+                            <button class="send-button" id="sendButton" type="submit" aria-label="Send message">
+                                <span>↑</span>
+                            </button>
+                        </div>
                     </div>
                 </form>
                 <p class="disclaimer">AI can make mistakes. Check important information independently.</p>
