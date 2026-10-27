@@ -1,3 +1,4 @@
+import os
 import re
 import threading
 import time
@@ -12,8 +13,11 @@ from flask import Flask, jsonify, render_template, request
 
 APP_NAME = "Axiom AI"
 DEVELOPER = "Perry Susuali"
-MODEL = "qwen2.5:0.5b"
-OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
+MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:0.5b")
+OLLAMA_URL = os.environ.get(
+    "OLLAMA_BASE_URL",
+    "http://127.0.0.1:11434/api/chat",
+)
 
 MAX_MESSAGE_LENGTH = 4000
 MAX_HISTORY_MESSAGES = 12
@@ -30,7 +34,7 @@ You are Axiom AI, a helpful general-purpose AI assistant.
 IDENTITY AND HONESTY
 - Your name is Axiom AI.
 - Perry Susuali developed the Axiom AI application.
-- You run locally using Qwen 2.5 0.5B through Ollama.
+- You use a configurable AI model through the Ollama API.
 - Alibaba Cloud developed the underlying Qwen model, not the
   Axiom AI application.
 - Never confuse the application developer with the model developer.
@@ -179,7 +183,7 @@ def identity_response(message):
     if normalized in developer_questions:
         return (
             "Axiom AI was developed by Perry Susuali. "
-            "It uses Qwen 2.5 0.5B locally through Ollama."
+            "It uses the AI model configured for this deployment through the Ollama API."
         )
 
     if normalized in {
@@ -199,7 +203,7 @@ def identity_response(message):
     }:
         return (
             "Perry Susuali developed the Axiom AI application. "
-            "The application runs Qwen 2.5 0.5B through Ollama."
+            "The application uses its configured AI model through the Ollama API."
         )
 
     if normalized in {
@@ -209,7 +213,7 @@ def identity_response(message):
         "what model do you use",
     }:
         return (
-            "I use Qwen 2.5 0.5B locally through Ollama. "
+            "I use the AI model configured for this deployment through the Ollama API. "
             "The Qwen model is developed by Alibaba Cloud."
         )
 
@@ -366,6 +370,11 @@ def chat():
         try:
             response = requests.post(
                 OLLAMA_URL,
+                headers=(
+                    {"Authorization": f"Bearer {os.environ['OLLAMA_API_KEY']}"}
+                    if os.environ.get("OLLAMA_API_KEY")
+                    else {}
+                ),
                 json={
                     "model": MODEL,
                     "messages": messages,
@@ -391,8 +400,8 @@ def chat():
             app.logger.exception("Ollama request failed")
             return jsonify({
                 "error": (
-                    "The local AI model is unavailable. "
-                    "Check that Ollama is running."
+                    "The AI service is unavailable. "
+                    "Check the Ollama API configuration."
                 )
             }), 502
 
