@@ -197,6 +197,20 @@ function appendMessage(role, content, options = {}) {
     return article;
 }
 
+function cleanMarkdownText(text) {
+    return String(text)
+        .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+        .replace(/^\s*[-*+]\s+/gm, "")
+        .replace(/^\s*>\s?/gm, "")
+        .replace(/^\s*[-*_]{3,}\s*$/gm, "")
+        .replace(/\*\*([^\n]+?)\*\*/g, "$1")
+        .replace(/__([^\n]+?)__/g, "$1")
+        .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, "$1")
+        .replace(/(?<!_)_([^_\n]+)_(?!_)/g, "$1")
+        .replace(/`([^`\n]+)`/g, "$1")
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, "$1 ($2)");
+}
+
 function renderText(container, text) {
     const lines = String(text).split("\n");
     let paragraph = [];
@@ -204,7 +218,7 @@ function renderText(container, text) {
     function flushParagraph() {
         if (!paragraph.length) return;
         const p = document.createElement("p");
-        p.textContent = paragraph.join("\n");
+        p.textContent = cleanMarkdownText(paragraph.join("\n"));
         container.appendChild(p);
         paragraph = [];
     }
@@ -275,7 +289,7 @@ function renderTextWithoutBlocks(container, text) {
         const block = blocks[i].trim();
         if (block) {
             const p = document.createElement("p");
-            p.textContent = block;
+            p.textContent = cleanMarkdownText(block);
             container.appendChild(p);
         }
 
