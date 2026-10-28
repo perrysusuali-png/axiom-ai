@@ -212,113 +212,73 @@ function cleanMarkdownText(text) {
 }
 
 function renderText(container, text) {
+    container.replaceChildren();
+
     const lines = String(text).split("\n");
     let paragraph = [];
 
     function flushParagraph() {
         if (!paragraph.length) return;
+
         const p = document.createElement("p");
         p.textContent = cleanMarkdownText(paragraph.join("\n"));
         container.appendChild(p);
         paragraph = [];
     }
 
-    for (const line of lines) {
-        const trimmed = line.trim();
+    function appendCodeBlock(codeText) {
+        const copy = document.createElement("button");
+        copy.type = "button";
+        copy.className = "copy-code";
+        copy.textContent = "Copy code";
 
-        if (!trimmed) {
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
+        code.textContent = codeText;
+        pre.appendChild(code);
+
+        copy.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(code.textContent);
+                copy.textContent = "Copied";
+            } catch {
+                showToast("Unable to copy code in this browser.");
+            }
+        });
+
+        container.append(copy, pre);
+    }
+
+    for (let i = 0; i < lines.length; i += 1) {
+        const line = lines[i];
+
+        if (line.trim().startsWith("```")) {
             flushParagraph();
+
+            const codeLines = [];
+            i += 1;
+
+            while (
+                i < lines.length &&
+                !lines[i].trim().startsWith("```")
+            ) {
+                codeLines.push(lines[i]);
+                i += 1;
+            }
+
+            appendCodeBlock(codeLines.join("\n"));
             continue;
         }
 
-        if (trimmed.startsWith("```")) {
+        if (!line.trim()) {
             flushParagraph();
-            const codeLines = [];
-            let foundEnd = false;
-
-            const start = lines.indexOf(line);
-            for (let i = start + 1; i < lines.length; i += 1) {
-                if (lines[i].trim().startsWith("```")) {
-                    foundEnd = true;
-                    break;
-                }
-                codeLines.push(lines[i]);
-            }
-
-            const pre = document.createElement("pre");
-            const code = document.createElement("code");
-            code.textContent = codeLines.join("\n");
-            pre.appendChild(code);
-
-            const copy = document.createElement("button");
-            copy.type = "button";
-            copy.className = "copy-code";
-            copy.textContent = "Copy code";
-            copy.addEventListener("click", async () => {
-                try {
-                    await navigator.clipboard.writeText(code.textContent);
-                    copy.textContent = "Copied";
-                } catch {
-                    showToast("Unable to copy code in this browser.");
-                }
-            });
-
-            container.append(copy, pre);
-
-            if (!foundEnd) break;
-            const endIndex = lines.indexOf(lines.slice(start + 1).find(item => item.trim().startsWith("```")));
-            if (endIndex !== -1) {
-                lines.splice(start, endIndex - start + 1);
-            }
-            return renderTextWithoutBlocks(container, text);
+            continue;
         }
 
         paragraph.push(line);
     }
 
     flushParagraph();
-}
-
-function renderTextWithoutBlocks(container, text) {
-    container.replaceChildren();
-    const blocks = String(text).split(/```[\s\S]*?```/g);
-    const codeBlocks = String(text).match(/```[\s\S]*?```/g) || [];
-    let cursor = 0;
-
-    for (let i = 0; i < blocks.length; i += 1) {
-        const block = blocks[i].trim();
-        if (block) {
-            const p = document.createElement("p");
-            p.textContent = cleanMarkdownText(block);
-            container.appendChild(p);
-        }
-
-        if (codeBlocks[i]) {
-            const codeText = codeBlocks[i].replace(/^```[^\n]*\n?/, "").replace(/```$/, "").trimEnd();
-            const copy = document.createElement("button");
-            copy.type = "button";
-            copy.className = "copy-code";
-            copy.textContent = "Copy code";
-
-            const pre = document.createElement("pre");
-            const code = document.createElement("code");
-            code.textContent = codeText;
-            pre.appendChild(code);
-
-            copy.addEventListener("click", async () => {
-                try {
-                    await navigator.clipboard.writeText(codeText);
-                    copy.textContent = "Copied";
-                } catch {
-                    showToast("Unable to copy code in this browser.");
-                }
-            });
-
-            container.append(copy, pre);
-        }
-
-        cursor += block.length;
-    }
 }
 
 function scrollToBottom() {
