@@ -1059,3 +1059,226 @@ textarea:focus-visible {
         transition: none;
     }
 }
+
+/* Axiom AI — modern dimensional visual layer */
+:root {
+    color-scheme: dark;
+    --bg: #080d1a;
+    --panel: #10182b;
+    --panel-soft: #17223b;
+    --border: rgba(145, 164, 220, 0.19);
+    --text: #f2f5ff;
+    --muted: #9ba9c9;
+    --accent: #9b8cff;
+    --accent-strong: #7865f5;
+    --ai-cyan: #53e5ff;
+    --ai-violet: #9575ff;
+    --ai-glow: rgba(112, 93, 255, 0.24);
+}
+
+body {
+    background:
+        radial-gradient(ellipse at 15% 0%, rgba(76, 104, 255, 0.15), transparent 38%),
+        radial-gradient(ellipse at 90% 85%, rgba(0, 210, 255, 0.08), transparent 34%),
+        var(--bg);
+    color: var(--text);
+}
+
+.sidebar {
+    background: linear-gradient(180deg, rgba(17, 26, 47, 0.97), rgba(9, 15, 29, 0.98));
+    border-right-color: var(--border);
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.15);
+}
+
+.brand-mark {
+    color: #ffffff;
+    border: 1px solid rgba(180, 168, 255, 0.75);
+    background: linear-gradient(145deg, #b6a8ff 0%, #7962f4 52%, #4336a8 100%);
+    box-shadow: 0 5px 18px rgba(117, 94, 255, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+}
+
+.brand-name {
+    letter-spacing: -0.55px;
+}
+
+.icon-button,
+.utility-button {
+    border-color: var(--border);
+    background: linear-gradient(145deg, rgba(33, 45, 73, 0.9), rgba(15, 24, 43, 0.9));
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2), inset 0 1px rgba(255, 255, 255, 0.045);
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.icon-button:hover,
+.utility-button:hover {
+    transform: translateY(-2px);
+    border-color: rgba(83, 229, 255, 0.65);
+    background: linear-gradient(145deg, #26375a, #17243f);
+    box-shadow: 0 7px 18px rgba(0, 0, 0, 0.26), 0 0 14px rgba(83, 229, 255, 0.1);
+}
+
+.new-chat-button {
+    color: #ffffff;
+    border-color: rgba(181, 167, 255, 0.65);
+    background: linear-gradient(135deg, #a394ff, #7861f2 58%, #5845ce);
+    box-shadow: 0 7px 18px rgba(102, 79, 240, 0.27), inset 0 1px rgba(255, 255, 255, 0.35);
+    transition: transform 180ms ease, filter 180ms ease, box-shadow 180ms ease;
+}
+
+.new-chat-button:hover {
+    background: linear-gradient(135deg, #b7aaff, #8975ff 58%, #6955df);
+    transform: translateY(-2px);
+    box-shadow: 0 11px 24px rgba(102, 79, 240, 0.35), inset 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.history-item {
+    color: #b4c1df;
+    border-radius: 11px;
+    transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.history-item:hover,
+.history-item.active {
+    color: #f3f5ff;
+    border-color: rgba(149, 117, 255, 0.24);
+    background: linear-gradient(100deg, rgba(126, 104, 255, 0.17), rgba(83, 229, 255, 0.045));
+}
+
+.history-item:hover {
+    transform: translateX(2px);
+}
+
+.sidebar-label {
+    color: #8597bf;
+    letter-spacing: 1.5px;
+}
+
+.main-content {
+    background: transparent;
+}
+
+.messages {
+    scrollbar-color: #3b4770 transparent;
+}
+
+.message-avatar {
+    border: 1px solid rgba(157, 174, 220, 0.22);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.message.assistant .message-avatar {
+    color: #e7e3ff;
+    border-color: rgba(149, 117, 255, 0.42);
+    background: linear-gradient(145deg, #403873, #1a2344);
+    box-shadow: 0 4px 16px rgba(113, 90, 255, 0.15), inset 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.message.user .message-avatar {
+    color: #d8fbff;
+    border-color: rgba(83, 229, 255, 0.35);
+    background: linear-gradient(145deg, #1c526b, #16304b);
+}
+
+.message.user .message-body {
+    border: 1px solid rgba(149, 117, 255, 0.25);
+    border-radius: 17px 17px 5px 17px;
+    background: linear-gradient(140deg, rgba(75, 67, 140, 0.34), rgba(27, 39, 68, 0.92));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), inset 0 1px rgba(255, 255, 255, 0.045);
+}
+
+.message.assistant .message-body {
+    color: #e4eaff;
+}
+
+.composer-section {
+    background: linear-gradient(180deg, transparent, rgba(8, 13, 26, 0.93) 24%);
+}
+
+.composer {
+    border: 1px solid rgba(140, 157, 213, 0.26);
+    border-radius: 20px;
+    background: linear-gradient(145deg, rgba(23, 34, 59, 0.97), rgba(13, 21, 39, 0.98));
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.27), inset 0 1px rgba(255, 255, 255, 0.07);
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.composer:focus-within {
+    border-color: rgba(149, 117, 255, 0.7);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(149, 117, 255, 0.09), 0 0 24px rgba(83, 229, 255, 0.06);
+}
+
+#messageInput {
+    color: var(--text);
+    caret-color: var(--ai-cyan);
+}
+
+#messageInput::placeholder {
+    color: #8492b4;
+}
+
+.send-button {
+    border: 1px solid rgba(188, 177, 255, 0.5);
+    background: linear-gradient(145deg, #b4a6ff, #8169f7 58%, #604bd7);
+    box-shadow: 0 5px 14px rgba(112, 88, 255, 0.3), inset 0 1px rgba(255, 255, 255, 0.45);
+    transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.send-button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+    box-shadow: 0 8px 20px rgba(112, 88, 255, 0.4), inset 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.send-button:active,
+.new-chat-button:active,
+.utility-button:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+}
+
+button:focus-visible,
+textarea:focus-visible {
+    outline-color: var(--ai-cyan);
+}
+
+.disclaimer,
+.composer-note {
+    color: #8e9cbd;
+}
+
+.error-message {
+    color: #ff9da9;
+}
+
+.typing-dots span {
+    background: var(--ai-cyan);
+    box-shadow: 0 0 9px rgba(83, 229, 255, 0.35);
+}
+
+.message-body img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid rgba(149, 117, 255, 0.28);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+::selection {
+    color: #ffffff;
+    background: rgba(124, 103, 255, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

@@ -10,6 +10,7 @@ const elements = {
     chatForm: document.getElementById("chatForm"),
     messageInput: document.getElementById("messageInput"),
     sendButton: document.getElementById("sendButton"),
+    imageButton: document.getElementById("imageButton"),
     voiceButton: document.getElementById("voiceButton"),
     speakButton: document.getElementById("speakButton"),
     stopSpeakingButton: document.getElementById("stopSpeakingButton"),
@@ -374,6 +375,75 @@ async function sendMessage(text) {
     }
 }
 
+async function generateImage(prompt) {
+    if (busy) {
+        showError("Wait for the current message to finish first.");
+        return;
+    }
+
+    const imagePrompt = prompt.trim();
+    if (!imagePrompt) {
+        showError("Describe the image you want, then click the image button.");
+        elements.messageInput.focus();
+        return;
+    }
+
+    if (imagePrompt.length > 1000) {
+        showError("Image prompts must be 1,000 characters or fewer.");
+        return;
+    }
+
+    clearError();
+    elements.imageButton.disabled = true;
+    elements.imageButton.setAttribute("aria-busy", "true");
+    elements.imageButton.title = "Generating image...";
+    showToast("Generating your image. This may take a moment.");
+
+    try {
+        const response = await fetch("/api/generate-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: imagePrompt })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(result.error || "Image generation failed.");
+        }
+        if (typeof result.image !== "string" || !result.image) {
+            throw new Error("The server returned no image.");
+        }
+
+        const article = appendMessage(
+            "assistant",
+            "Generated image for: " + imagePrompt
+        );
+        const body = article.querySelector(".message-body");
+        const image = document.createElement("img");
+        image.src = "data:" + (result.mime_type === "image/png" ? result.mime_type : "image/png") + ";base64," + result.image;
+        image.alt = "AI-generated image for: " + imagePrompt;
+        image.loading = "lazy";
+        image.style.display = "block";
+        image.style.width = "100%";
+        image.style.maxWidth = "640px";
+        image.style.height = "auto";
+        image.style.borderRadius = "12px";
+        image.style.marginTop = "12px";
+        image.addEventListener("error", () => {
+            image.replaceWith(document.createTextNode("The generated image could not be displayed."));
+        }, { once: true });
+        body.appendChild(image);
+        scrollToBottom();
+        showToast("Image generated successfully.");
+    } catch (error) {
+        showError(error.message || "Image generation failed. Please try again.");
+    } finally {
+        elements.imageButton.disabled = false;
+        elements.imageButton.removeAttribute("aria-busy");
+        elements.imageButton.title = "Generate an image";
+    }
+}
+
 function resizeInput() {
     elements.messageInput.style.height = "auto";
     elements.messageInput.style.height =
@@ -383,6 +453,10 @@ function resizeInput() {
 function closeSidebar() {
     elements.sidebar.classList.remove("open");
 }
+
+elements.imageButton.addEventListener("click", () => {
+    generateImage(elements.messageInput.value);
+});
 
 elements.chatForm.addEventListener("submit", event => {
     event.preventDefault();

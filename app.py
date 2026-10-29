@@ -13,6 +13,7 @@ APP_NAME = "Axiom AI"
 DEVELOPER = "Perry Susuali"
 MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell"
 
 MAX_MESSAGE_LENGTH = 4000
 MAX_CHAT_REQUEST_BYTES = 64 * 1024
@@ -308,6 +309,61 @@ def health():
         "model": MODEL,
         "status": "ok",
     }), 200
+
+
+@app.route("/api/generate-image", methods=["POST"])
+def generate_image():
+    client_id = request.remote_addr or "unknown"
+
+    if is_rate_limited(f"image:{client_id}"):
+        return jsonify({"error": "Please wait before generating another image."}), 429
+
+    if not request.is_json:
+        return jsonify({"error": "Send a valid JSON request."}), 400
+
+    data = request.get_json(silent=True) or {}
+    prompt = data.get("prompt")
+
+    if not isinstance(prompt, str) or not prompt.strip():
+        return jsonify({"error": "Enter a prompt describing the image."}), 400
+
+    prompt = prompt.strip()
+    if len(prompt) > 1000:
+        return jsonify({"error": "Image prompts must be 1000 characters or fewer."}), 400
+
+    account_id = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+    api_token = os.environ.get("CLOUDFLARE_API_TOKEN")
+
+    if not account_id or not api_token:
+        return jsonify({"error": "Image generation is not configured on the server."}), 503
+
+    url = (
+        f"https://api.cloudflare.com/client/v4/accounts/"
+        f"{account_id}/ai/run/{CLOUDFLARE_IMAGE_MODEL}"
+    )
+
+    try:
+        response = requests.post(
+            url,
+            headers={"Authorization": f"Bearer {api_token}"},
+            json={"prompt": prompt, "steps": 4},
+            timeout=90,
+        )
+        if not response.ok:
+            app.logger.warning("Image provider returned HTTP %s", response.status_code)
+            return jsonify({"error": "The image provider could not complete the request."}), 502
+
+        result = response.json().get("result", {})
+        image_data = result.get("image") if isinstance(result, dict) else None
+
+        if not isinstance(image_data, str) or not image_data:
+            return jsonify({"error": "The image provider returned no image."}), 502
+
+        return jsonify({"image": image_data, "mime_type": "image/png"}), 200
+
+    except (requests.RequestException, ValueError):
+        app.logger.exception("Image generation request failed")
+        return jsonify({"error": "Image generation failed. Please try again."}), 502
 
 
 @app.route("/api/chat", methods=["POST"])
