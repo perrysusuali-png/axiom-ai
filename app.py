@@ -467,7 +467,7 @@ def chat():
                     "temperature": 0.3,
                     "stream": False,
                     "tools": [{"type": "browser_search"}],
-                    "tool_choice": "required",
+                    "tool_choice": "auto",
                 },
                 timeout=MODEL_TIMEOUT,
             )
