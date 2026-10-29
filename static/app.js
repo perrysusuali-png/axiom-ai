@@ -319,11 +319,33 @@ function updateConversationTitle(conversation) {
 }
 
 function extractImagePrompt(message) {
-    const imageRequestPattern = /^\s*(?:(?:please|can you|could you|would you)\s+)*(?:generate|create|make|draw|render|design|illustrate|visualize)\s+(?:(?:me|an?|a)\s+)*(?:image|picture|illustration|artwork|logo|poster|wallpaper|graphic)\b(?:\s+(?:of|for|about|showing|featuring|with))?\s*/i;
-    if (!imageRequestPattern.test(message)) return null;
-    return message.replace(imageRequestPattern, "").trim().replace(/[.!?]+$/, "").trim();
-}
+    const imageTypes = "image|picture|illustration|artwork|logo|poster|wallpaper|graphic";
+    const verbs = "generate|create|make|draw|render|design|illustrate|visualize";
+    const polite = "(?:(?:please|can you|could you|would you)\\s+)*";
 
+    const directPattern = new RegExp(
+        "^\\s*" + polite + "(?:" + verbs + ")\\s+(?:(?:me|an?|a)\\s+)*(?:" +
+        imageTypes + ")\\b(?:\\s+(?:of|for|about|showing|featuring|with))?\\s*",
+        "i"
+    );
+
+    const subjectFirstPattern = new RegExp(
+        "^\\s*" + polite + "(?:" + verbs + ")\\s+(?:me\\s+)?(?:an?\\s+)?(.+?)\\s+(?:" +
+        imageTypes + ")\\s*(?:for me)?\\s*[.!?]*$",
+        "i"
+    );
+
+    if (directPattern.test(message)) {
+        return message.replace(directPattern, "").trim().replace(/[.!?]+$/, "").trim();
+    }
+
+    const subjectFirstMatch = message.match(subjectFirstPattern);
+    if (subjectFirstMatch) {
+        return subjectFirstMatch[1].trim().replace(/[.!?]+$/, "").trim();
+    }
+
+    return null;
+}
 async function sendMessage(text) {
     if (busy) return;
 
