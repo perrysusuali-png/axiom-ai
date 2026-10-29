@@ -11,6 +11,7 @@ const elements = {
     messageInput: document.getElementById("messageInput"),
     sendButton: document.getElementById("sendButton"),
     imageButton: document.getElementById("imageButton"),
+    languageSelect: document.getElementById("languageSelect"),
     voiceButton: document.getElementById("voiceButton"),
     speakButton: document.getElementById("speakButton"),
     stopSpeakingButton: document.getElementById("stopSpeakingButton"),
@@ -22,6 +23,17 @@ const STORAGE_KEY = "axiom-ai-conversations-v1";
 const MAX_CONVERSATIONS = 30;
 const MAX_STORED_MESSAGES = 100;
 const MAX_HISTORY_MESSAGES = 12;
+const LANGUAGE_STORAGE_KEY = "axiom-ai-language-v1";
+const SUPPORTED_LANGUAGE_CODES = new Set(["en", "tw", "ee", "dag", "fat", "gaa"]);
+
+let selectedLanguage = (() => {
+    try {
+        const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+        return SUPPORTED_LANGUAGE_CODES.has(saved) ? saved : "en";
+    } catch {
+        return "en";
+    }
+})();
 
 let conversations = loadConversations();
 let activeConversationId = null;
@@ -306,11 +318,33 @@ function updateConversationTitle(conversation) {
     conversation.updatedAt = Date.now();
 }
 
+function extractImagePrompt(message) {
+    const imageRequestPattern = /^\\s*(?:(?:please|can you|could you|would you)\\s+)*(?:generate|create|make|draw|render|design|illustrate|visualize)\\s+(?:(?:me|an?|a)\\s+)*(?:image|picture|illustration|artwork|logo|poster|wallpaper|graphic)\\b(?:\\s+(?:of|for|about|showing|featuring|with))?\\s*/i;
+    if (!imageRequestPattern.test(message)) return null;
+    return message.replace(imageRequestPattern, "").trim().replace(/[.!?]+$/, "").trim();
+}
+
 async function sendMessage(text) {
     if (busy) return;
 
     const message = text.trim();
     if (!message) return;
+
+    const imagePrompt = extractImagePrompt(message);
+    if (imagePrompt !== null) {
+        clearError();
+        if (!activeConversation()) createConversation();
+        const conversation = activeConversation();
+        conversation.messages.push({ role: "user", content: message });
+        updateConversationTitle(conversation);
+        saveConversations();
+        renderHistory();
+        renderConversation();
+        elements.messageInput.value = "";
+        resizeInput();
+        await generateImage(imagePrompt);
+        return;
+    }
 
     if (message.length > 4000) {
         showError("Please keep your message under 4,000 characters.");
@@ -343,7 +377,8 @@ async function sendMessage(text) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 message,
-                history: previousMessages
+                history: previousMessages,
+                language: selectedLanguage
             })
         });
 
@@ -453,6 +488,17 @@ function resizeInput() {
 function closeSidebar() {
     elements.sidebar.classList.remove("open");
 }
+
+elements.languageSelect.value = selectedLanguage;
+elements.languageSelect.addEventListener("change", () => {
+    const nextLanguage = elements.languageSelect.value;
+    selectedLanguage = SUPPORTED_LANGUAGE_CODES.has(nextLanguage) ? nextLanguage : "en";
+    try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, selectedLanguage);
+    } catch {
+        showToast("Language selection could not be saved in this browser.");
+    }
+});
 
 elements.imageButton.addEventListener("click", () => {
     generateImage(elements.messageInput.value);
