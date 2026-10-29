@@ -1839,3 +1839,215 @@ select:focus-visible {
         max-height: 24vh;
     }
 }
+
+:root {
+    color-scheme: dark;
+    --bg: #100609;
+    --panel: #1b0a10;
+    --panel-soft: #2a0d17;
+    --border: #54202e;
+    --text: #fff1f3;
+    --muted: #c7a7af;
+    --accent: #ff334f;
+    --accent-strong: #ff1238;
+}
+
+body {
+    position: relative;
+    isolation: isolate;
+    overflow-x: hidden;
+    background: #100609;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: -35%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 18% 25%, rgba(255, 18, 56, .28), transparent 35%),
+        radial-gradient(ellipse at 80% 30%, rgba(180, 0, 40, .24), transparent 32%),
+        radial-gradient(ellipse at 55% 85%, rgba(255, 55, 75, .16), transparent 38%),
+        linear-gradient(135deg, #100609, #240812, #100609, #350916);
+    background-size: 160% 160%;
+    animation: liquidRedFlow 18s ease-in-out infinite alternate;
+}
+
+.app-shell {
+    position: relative;
+    background: transparent;
+}
+
+.sidebar {
+    background: rgba(19, 5, 10, .88);
+    border-right-color: rgba(255, 65, 91, .24);
+    backdrop-filter: blur(22px);
+}
+
+.main-panel,
+.chat-area,
+.composer-section {
+    background: transparent;
+}
+
+.topbar {
+    background: rgba(16, 6, 9, .48);
+    border-bottom-color: rgba(255, 65, 91, .16);
+    backdrop-filter: blur(18px);
+}
+
+.brand-mark {
+    color: #fff !important;
+    border-color: #ff5269;
+    background: linear-gradient(145deg, #ff6477, #e20d36 58%, #76071f);
+    box-shadow: 0 0 24px rgba(255, 35, 69, .32);
+    animation: redPulse 4s ease-in-out infinite;
+}
+
+.brand-subtitle,
+.sidebar-label,
+.sidebar-section-title,
+.composer-note,
+.disclaimer {
+    color: #c7a7af;
+}
+
+.new-chat-button,
+.send-button {
+    color: #fff;
+    border: 1px solid rgba(255, 160, 174, .65);
+    background: linear-gradient(135deg, #ff5269, #e20d36 58%, #a8082b);
+    box-shadow: 0 5px 22px rgba(255, 18, 56, .2);
+    transition: transform .2s ease, box-shadow .25s ease, filter .25s ease;
+}
+
+.new-chat-button:hover,
+.send-button:hover {
+    color: #fff;
+    filter: brightness(1.12);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(255, 18, 56, .38);
+}
+
+button:focus-visible,
+textarea:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid #ff5269;
+    outline-offset: 3px;
+}
+
+.icon-button,
+.utility-button,
+.extension-button,
+.suggestion,
+.history-item,
+#conversationSearch,
+#languageSelect,
+.composer {
+    border-color: rgba(255, 92, 116, .24);
+}
+
+.icon-button,
+.utility-button {
+    background: rgba(70, 12, 28, .42);
+}
+
+.icon-button:hover,
+.utility-button:hover {
+    border-color: #ff5269;
+    background: rgba(160, 14, 44, .36);
+}
+
+.extension-button,
+.suggestion,
+.history-item {
+    background: rgba(37, 9, 17, .68);
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.extension-button:hover,
+.suggestion:hover,
+.history-item:hover {
+    border-color: rgba(255, 82, 105, .72);
+    background: rgba(110, 13, 34, .52);
+}
+
+#conversationSearch,
+#languageSelect {
+    color: #fff1f3;
+    background-color: rgba(30, 8, 15, .88);
+}
+
+#conversationSearch::placeholder,
+#messageInput::placeholder {
+    color: #b99aa2;
+}
+
+.composer {
+    background: rgba(28, 8, 15, .88);
+    border-color: rgba(255, 82, 105, .34);
+    box-shadow: 0 0 35px rgba(180, 0, 40, .12);
+    backdrop-filter: blur(18px);
+}
+
+.composer:focus-within {
+    border-color: rgba(255, 82, 105, .78);
+    box-shadow: 0 0 0 3px rgba(255, 51, 79, .09),
+                0 0 32px rgba(255, 18, 56, .15);
+}
+
+#messageInput {
+    color: #fff1f3;
+    background: transparent;
+}
+
+.topbar-title span,
+.welcome h1 span,
+.eyebrow,
+.welcome-symbol,
+.suggestion-icon,
+.extension-icon {
+    color: #ff5269;
+}
+
+.model-badge {
+    border-color: rgba(255, 82, 105, .28);
+    background: rgba(100, 12, 31, .3);
+}
+
+@keyframes liquidRedFlow {
+    0% {
+        background-position: 0% 20%;
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        background-position: 100% 70%;
+        transform: rotate(3deg) scale(1.04);
+    }
+    100% {
+        background-position: 20% 100%;
+        transform: rotate(-2deg) scale(1.02);
+    }
+}
+
+@keyframes redPulse {
+    0%, 100% {
+        box-shadow: 0 0 16px rgba(255, 35, 69, .2);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 35, 69, .48);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+    }
+}
