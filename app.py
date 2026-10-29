@@ -513,13 +513,26 @@ def chat():
                 )
             }), 504
 
+        except requests.HTTPError:
+            status_code = getattr(
+                getattr(response, "status_code", None),
+                "__int__",
+                lambda: None,
+            )()
+            error_body = getattr(response, "text", "")[:1500]
+            app.logger.error(
+                "Groq HTTP error %s: %s",
+                status_code,
+                error_body,
+            )
+            return jsonify({
+                "error": "The AI provider rejected the request. Check server logs."
+            }), 502
+
         except requests.RequestException:
             app.logger.exception("Groq API request failed.")
             return jsonify({
-                "error": (
-                    "The AI service is temporarily unavailable. "
-                    "Check the Groq service and configuration."
-                )
+                "error": "The AI service is temporarily unavailable."
             }), 502
 
         except ValueError:
