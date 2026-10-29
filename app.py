@@ -14,6 +14,14 @@ DEVELOPER = "Perry Susuali"
 MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell"
+SUPPORTED_LANGUAGES = {
+    "en": "English",
+    "tw": "Twi (Akan)",
+    "ee": "Ewe",
+    "dag": "Dagbani",
+    "fat": "Fante",
+    "gaa": "Ga",
+}
 
 MAX_MESSAGE_LENGTH = 4000
 MAX_CHAT_REQUEST_BYTES = 64 * 1024
@@ -409,7 +417,11 @@ def chat():
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
 
-    known_reply = identity_response(message)
+    language = data.get("language", "en")
+    if not isinstance(language, str) or language not in SUPPORTED_LANGUAGES:
+        language = "en"
+
+    known_reply = identity_response(message) if language == "en" else None
 
     if known_reply is not None:
         return jsonify({
@@ -425,7 +437,14 @@ def chat():
             "error": "The AI service is not configured yet."
         }), 503
 
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    language_instruction = (
+        f"Respond in {SUPPORTED_LANGUAGES[language]}. "
+        "Keep the answer in that language unless the user explicitly requests another language."
+    )
+    messages = [{
+        "role": "system",
+        "content": SYSTEM_PROMPT + "\n\nLANGUAGE REQUIREMENT:\n" + language_instruction,
+    }]
     messages.extend(history)
     messages.append({"role": "user", "content": message})
 
