@@ -165,3 +165,50 @@ def test_identity_response_does_not_require_model(client):
     assert response.status_code == 200
     assert "Perry Susuali" in response.json["reply"]
     mocked_post.assert_not_called()
+
+
+def test_selected_language_is_added_to_system_prompt(client):
+    mocked_response = Mock()
+    mocked_response.json.return_value = {
+        "choices": [{"message": {"content": "Medaase."}}]
+    }
+
+    with patch("app.requests.post", return_value=mocked_response) as mocked_post:
+        response = client.post(
+            "/api/chat",
+            json={"message": "Say hello", "history": [], "language": "tw"},
+        )
+
+    assert response.status_code == 200
+    sent_messages = mocked_post.call_args.kwargs["json"]["messages"]
+    assert "Respond in Twi (Akan)" in sent_messages[0]["content"]
+
+
+def test_invalid_language_falls_back_to_english(client):
+    mocked_response = Mock()
+    mocked_response.json.return_value = {
+        "choices": [{"message": {"content": "Hello."}}]
+    }
+
+    with patch("app.requests.post", return_value=mocked_response) as mocked_post:
+        response = client.post(
+            "/api/chat",
+            json={"message": "Say hello", "history": [], "language": "unsupported"},
+        )
+
+    assert response.status_code == 200
+    sent_messages = mocked_post.call_args.kwargs["json"]["messages"]
+    assert "Respond in English" in sent_messages[0]["content"]
+
+
+def test_image_generation_requires_cloudflare_configuration(client, monkeypatch):
+    monkeypatch.delenv("CLOUDFLARE_ACCOUNT_ID", raising=False)
+    monkeypatch.delenv("CLOUDFLARE_API_TOKEN", raising=False)
+
+    response = client.post(
+        "/api/generate-image",
+        json={"prompt": "A clean Axiom AI logo"},
+    )
+
+    assert response.status_code == 503
+    assert response.json["error"] == "Image generation is not configured on the server."
