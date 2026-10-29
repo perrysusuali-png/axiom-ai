@@ -443,7 +443,7 @@ def chat():
     )
     messages = [{
         "role": "system",
-        "content": SYSTEM_PROMPT + "\\n\\nLANGUAGE REQUIREMENT:\\n" + language_instruction,
+        "content": SYSTEM_PROMPT + "\n\nLANGUAGE REQUIREMENT:\n" + language_instruction,
     }]
     messages.extend(history)
     messages.append({"role": "user", "content": message})
