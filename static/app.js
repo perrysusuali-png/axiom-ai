@@ -319,7 +319,7 @@ function updateConversationTitle(conversation) {
 }
 
 function extractImagePrompt(message) {
-    const imageRequestPattern = /^\\s*(?:(?:please|can you|could you|would you)\\s+)*(?:generate|create|make|draw|render|design|illustrate|visualize)\\s+(?:(?:me|an?|a)\\s+)*(?:image|picture|illustration|artwork|logo|poster|wallpaper|graphic)\\b(?:\\s+(?:of|for|about|showing|featuring|with))?\\s*/i;
+    const imageRequestPattern = /^\s*(?:(?:please|can you|could you|would you)\s+)*(?:generate|create|make|draw|render|design|illustrate|visualize)\s+(?:(?:me|an?|a)\s+)*(?:image|picture|illustration|artwork|logo|poster|wallpaper|graphic)\b(?:\s+(?:of|for|about|showing|featuring|with))?\s*/i;
     if (!imageRequestPattern.test(message)) return null;
     return message.replace(imageRequestPattern, "").trim().replace(/[.!?]+$/, "").trim();
 }
