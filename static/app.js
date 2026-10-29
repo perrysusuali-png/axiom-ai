@@ -4,6 +4,7 @@ const elements = {
     closeSidebar: document.getElementById("closeSidebar"),
     newChat: document.getElementById("newChat"),
     historyList: document.getElementById("historyList"),
+    conversationSearch: document.getElementById("conversationSearch"),
     clearHistory: document.getElementById("clearHistory"),
     memoryEnabled: document.getElementById("memoryEnabled"),
     memoryInput: document.getElementById("memoryInput"),
@@ -70,8 +71,10 @@ function saveConversations() {
             STORAGE_KEY,
             JSON.stringify(conversations.slice(0, MAX_CONVERSATIONS))
         );
+        return true;
     } catch {
         showToast("Browser storage is unavailable. This chat may not be saved.");
+        return false;
     }
 }
 
@@ -125,19 +128,56 @@ function renderMemories() {
         const text = document.createElement("span");
         text.textContent = memory;
 
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.textContent = "Edit";
+        edit.setAttribute("aria-label", `Edit memory ${index + 1}`);
+        edit.addEventListener("click", () => {
+            const updated = window.prompt("Edit this memory:", memories[index]);
+            if (updated === null) return;
+
+            const value = updated.trim().slice(0, MAX_MEMORY_LENGTH);
+            if (!value) {
+                showToast("Memory cannot be empty. Use Delete to remove it.");
+                return;
+            }
+
+            if (memories.some((item, otherIndex) =>
+                otherIndex !== index && item.toLowerCase() === value.toLowerCase()
+            )) {
+                showToast("That memory is already saved.");
+                return;
+            }
+
+            const previous = memories[index];
+            memories[index] = value;
+            if (saveMemories()) {
+                renderMemories();
+                showToast("Memory updated.");
+            } else {
+                memories[index] = previous;
+            }
+        });
+
         const remove = document.createElement("button");
         remove.type = "button";
         remove.textContent = "Delete";
         remove.setAttribute("aria-label", `Delete memory ${index + 1}`);
         remove.addEventListener("click", () => {
+            if (!window.confirm("Delete this saved memory?")) return;
+
+            const previous = memories.slice();
             memories.splice(index, 1);
             if (saveMemories()) {
                 renderMemories();
                 showToast("Memory deleted.");
+            } else {
+                memories = previous;
+                renderMemories();
             }
         });
 
-        row.append(text, remove);
+        row.append(text, edit, remove);
         elements.memoryList.appendChild(row);
     });
 }
@@ -254,15 +294,29 @@ function createConversation() {
 function renderHistory() {
     elements.historyList.replaceChildren();
 
-    if (!conversations.length) {
+    const query = elements.conversationSearch.value.trim().toLowerCase();
+    const ordered = [...conversations].sort((a, b) =>
+        Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) ||
+        (b.updatedAt || 0) - (a.updatedAt || 0)
+    );
+    const visible = ordered.filter(conversation =>
+        (conversation.title || "New conversation").toLowerCase().includes(query)
+    );
+
+    if (!visible.length) {
         const empty = document.createElement("div");
         empty.className = "history-empty";
-        empty.textContent = "Your conversations will appear here.";
+        empty.textContent = conversations.length
+            ? "No conversations match your search."
+            : "Your conversations will appear here.";
         elements.historyList.appendChild(empty);
         return;
     }
 
-    for (const conversation of conversations) {
+    for (const conversation of visible) {
+        const row = document.createElement("div");
+        row.className = "history-row";
+
         const button = document.createElement("button");
         button.type = "button";
         button.className = "history-item";
@@ -271,7 +325,7 @@ function renderHistory() {
         }
 
         const icon = document.createElement("span");
-        icon.textContent = "◌";
+        icon.textContent = conversation.pinned ? "📌" : "◌";
         icon.setAttribute("aria-hidden", "true");
 
         const title = document.createElement("span");
@@ -286,7 +340,89 @@ function renderHistory() {
             closeSidebar();
         });
 
-        elements.historyList.appendChild(button);
+        const actions = document.createElement("div");
+        actions.className = "history-actions";
+
+        const pin = document.createElement("button");
+        pin.type = "button";
+        pin.textContent = conversation.pinned ? "Unpin" : "Pin";
+        pin.setAttribute(
+            "aria-label",
+            `${conversation.pinned ? "Unpin" : "Pin"} ${conversation.title || "conversation"}`
+        );
+        pin.addEventListener("click", () => {
+            conversation.pinned = !conversation.pinned;
+            if (saveConversations()) {
+                renderHistory();
+                showToast(conversation.pinned ? "Conversation pinned." : "Conversation unpinned.");
+            } else {
+                conversation.pinned = !conversation.pinned;
+                renderHistory();
+            }
+        });
+
+        const rename = document.createElement("button");
+        rename.type = "button";
+        rename.textContent = "Rename";
+        rename.addEventListener("click", () => {
+            const updated = window.prompt(
+                "Rename conversation:",
+                conversation.title || "New conversation"
+            );
+            if (updated === null) return;
+
+            const value = updated.trim().slice(0, 80);
+            if (!value) {
+                showToast("Conversation title cannot be empty.");
+                return;
+            }
+
+            const previousTitle = conversation.title;
+            const previousUpdatedAt = conversation.updatedAt;
+            conversation.title = value;
+            conversation.updatedAt = Date.now();
+
+            if (saveConversations()) {
+                renderHistory();
+                showToast("Conversation renamed.");
+            } else {
+                conversation.title = previousTitle;
+                conversation.updatedAt = previousUpdatedAt;
+                renderHistory();
+            }
+        });
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Delete";
+        remove.addEventListener("click", () => {
+            if (!window.confirm(
+                `Delete "${conversation.title || "New conversation"}"? This cannot be undone.`
+            )) return;
+
+            const previousConversations = conversations;
+            const previousActiveId = activeConversationId;
+
+            conversations = conversations.filter(item => item.id !== conversation.id);
+            if (activeConversationId === conversation.id) {
+                activeConversationId = null;
+            }
+
+            if (saveConversations()) {
+                renderHistory();
+                renderConversation();
+                showToast("Conversation deleted.");
+            } else {
+                conversations = previousConversations;
+                activeConversationId = previousActiveId;
+                renderHistory();
+                renderConversation();
+            }
+        });
+
+        actions.append(pin, rename, remove);
+        row.append(button, actions);
+        elements.historyList.appendChild(row);
     }
 }
 
@@ -731,6 +867,7 @@ elements.messageInput.addEventListener("keydown", event => {
     }
 });
 
+elements.conversationSearch.addEventListener("input", renderHistory);
 elements.newChat.addEventListener("click", createConversation);
 
 elements.clearHistory.addEventListener("click", () => {
