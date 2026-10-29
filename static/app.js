@@ -5,6 +5,11 @@ const elements = {
     newChat: document.getElementById("newChat"),
     historyList: document.getElementById("historyList"),
     clearHistory: document.getElementById("clearHistory"),
+    memoryEnabled: document.getElementById("memoryEnabled"),
+    memoryInput: document.getElementById("memoryInput"),
+    saveMemory: document.getElementById("saveMemory"),
+    memoryList: document.getElementById("memoryList"),
+    clearMemories: document.getElementById("clearMemories"),
     welcome: document.getElementById("welcome"),
     messages: document.getElementById("messages"),
     chatForm: document.getElementById("chatForm"),
@@ -20,6 +25,10 @@ const elements = {
 };
 
 const STORAGE_KEY = "axiom-ai-conversations-v1";
+const MEMORY_STORAGE_KEY = "axiom-ai-memories-v1";
+const MEMORY_ENABLED_KEY = "axiom-ai-memory-enabled-v1";
+const MAX_MEMORIES = 10;
+const MAX_MEMORY_LENGTH = 200;
 const MAX_CONVERSATIONS = 30;
 const MAX_STORED_MESSAGES = 100;
 const MAX_HISTORY_MESSAGES = 12;
@@ -65,6 +74,134 @@ function saveConversations() {
         showToast("Browser storage is unavailable. This chat may not be saved.");
     }
 }
+
+function loadMemories() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(MEMORY_STORAGE_KEY) || "[]");
+        if (!Array.isArray(saved)) return [];
+        return saved
+            .filter(item => typeof item === "string" && item.trim())
+            .map(item => item.trim().slice(0, MAX_MEMORY_LENGTH))
+            .slice(0, MAX_MEMORIES);
+    } catch {
+        return [];
+    }
+}
+
+function saveMemories() {
+    try {
+        localStorage.setItem(MEMORY_STORAGE_KEY, JSON.stringify(memories));
+        return true;
+    } catch {
+        showToast("Memory could not be saved in this browser.");
+        return false;
+    }
+}
+
+function loadMemoryEnabled() {
+    try {
+        return localStorage.getItem(MEMORY_ENABLED_KEY) === "true";
+    } catch {
+        return false;
+    }
+}
+
+let memories = loadMemories();
+let memoryEnabled = loadMemoryEnabled();
+
+function renderMemories() {
+    elements.memoryEnabled.checked = memoryEnabled;
+    elements.memoryList.replaceChildren();
+
+    if (!memories.length) {
+        const empty = document.createElement("p");
+        empty.textContent = "No saved memories yet.";
+        elements.memoryList.appendChild(empty);
+        return;
+    }
+
+    memories.forEach((memory, index) => {
+        const row = document.createElement("div");
+        const text = document.createElement("span");
+        text.textContent = memory;
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Delete";
+        remove.setAttribute("aria-label", `Delete memory ${index + 1}`);
+        remove.addEventListener("click", () => {
+            memories.splice(index, 1);
+            if (saveMemories()) {
+                renderMemories();
+                showToast("Memory deleted.");
+            }
+        });
+
+        row.append(text, remove);
+        elements.memoryList.appendChild(row);
+    });
+}
+
+elements.saveMemory.addEventListener("click", () => {
+    const value = elements.memoryInput.value.trim().slice(0, MAX_MEMORY_LENGTH);
+
+    if (!value) {
+        showToast("Enter a memory first.");
+        return;
+    }
+
+    if (memories.length >= MAX_MEMORIES) {
+        showToast("You can save up to 10 memories. Delete one first.");
+        return;
+    }
+
+    if (memories.some(item => item.toLowerCase() === value.toLowerCase())) {
+        showToast("That memory is already saved.");
+        return;
+    }
+
+    memories.push(value);
+    if (saveMemories()) {
+        elements.memoryInput.value = "";
+        renderMemories();
+        showToast("Memory saved in this browser.");
+    } else {
+        memories.pop();
+    }
+});
+
+elements.memoryEnabled.addEventListener("change", () => {
+    memoryEnabled = elements.memoryEnabled.checked;
+    try {
+        localStorage.setItem(MEMORY_ENABLED_KEY, String(memoryEnabled));
+        showToast(memoryEnabled
+            ? "Saved memories will be included in chat requests."
+            : "Saved memories are disabled for chat requests.");
+    } catch {
+        memoryEnabled = false;
+        elements.memoryEnabled.checked = false;
+        showToast("Memory preference could not be saved.");
+    }
+});
+
+elements.clearMemories.addEventListener("click", () => {
+    if (!memories.length) {
+        showToast("There are no saved memories to delete.");
+        return;
+    }
+
+    if (!window.confirm("Delete all saved memories from this browser?")) return;
+
+    const previous = memories;
+    memories = [];
+    if (saveMemories()) {
+        renderMemories();
+        showToast("All saved memories deleted.");
+    } else {
+        memories = previous;
+        renderMemories();
+    }
+});
 
 function makeId() {
     if (window.crypto && typeof window.crypto.randomUUID === "function") {
@@ -163,7 +300,7 @@ function renderConversation() {
     if (!conversation) return;
 
     for (const message of conversation.messages) {
-        appendMessage(message.role, message.content);
+        appendMessage(message.role, message.content, { sources: message.sources });
     }
 
     scrollToBottom();
@@ -203,6 +340,50 @@ function appendMessage(role, content, options = {}) {
     }
 
     contentArea.append(author, body);
+
+    if (role !== "user" && Array.isArray(options.sources)) {
+        const safeSources = options.sources.filter((source) => {
+            if (!source || typeof source.url !== "string") return false;
+            try {
+                const url = new URL(source.url);
+                return url.protocol === "https:" || url.protocol === "http:";
+            } catch {
+                return false;
+            }
+        }).slice(0, 10);
+
+        if (safeSources.length) {
+            const section = document.createElement("section");
+            section.className = "message-sources";
+
+            const heading = document.createElement("p");
+            heading.textContent = "Sources";
+            section.appendChild(heading);
+
+            const list = document.createElement("ul");
+
+            for (const source of safeSources) {
+                const item = document.createElement("li");
+                const link = document.createElement("a");
+                const url = new URL(source.url);
+
+                link.href = url.href;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.textContent = (
+                    typeof source.title === "string" && source.title.trim()
+                        ? source.title.trim().slice(0, 200)
+                        : url.hostname
+                );
+
+                item.appendChild(link);
+                list.appendChild(item);
+            }
+
+            section.appendChild(list);
+            contentArea.appendChild(section);
+        }
+    }
     article.append(avatar, contentArea);
     elements.messages.appendChild(article);
     scrollToBottom();
@@ -400,7 +581,8 @@ async function sendMessage(text) {
             body: JSON.stringify({
                 message,
                 history: previousMessages,
-                language: selectedLanguage
+                language: selectedLanguage,
+                memories: memoryEnabled ? memories : []
             })
         });
 
@@ -411,10 +593,18 @@ async function sendMessage(text) {
         }
 
         const reply = typeof result.reply === "string" ? result.reply.trim() : "";
+        const sources = Array.isArray(result.sources)
+            ? result.sources.filter((source) =>
+                source &&
+                typeof source.url === "string" &&
+                (source.url.startsWith("https://") || source.url.startsWith("http://")) &&
+                (source.title === undefined || typeof source.title === "string")
+            ).slice(0, 10)
+            : [];
         if (!reply) throw new Error("Axiom AI returned an empty response.");
 
         typing.remove();
-        conversation.messages.push({ role: "assistant", content: reply });
+        conversation.messages.push({ role: "assistant", content: reply, sources });
         conversation.messages = conversation.messages.slice(-MAX_STORED_MESSAGES);
         updateConversationTitle(conversation);
         saveConversations();
@@ -511,6 +701,7 @@ function closeSidebar() {
     elements.sidebar.classList.remove("open");
 }
 
+renderMemories();
 elements.languageSelect.value = selectedLanguage;
 elements.languageSelect.addEventListener("change", () => {
     const nextLanguage = elements.languageSelect.value;

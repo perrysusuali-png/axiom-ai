@@ -134,15 +134,28 @@ def test_model_connection_error_returns_502(client):
 def test_successful_model_response(client):
     mocked_response = Mock()
     mocked_response.json.return_value = {
-        "choices": [
+        "output": [
             {
-                "message": {
-                    "content": "Phishing is a deceptive attempt to steal information."
-                }
+                "type": "message",
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "output_text",
+                        "text": "Phishing is a deceptive attempt to steal information.",
+                        "annotations": [
+                            {
+                                "type": "url_citation",
+                                "url": "https://www.cisa.gov/",
+                                "title": "CISA",
+                            }
+                        ],
+                    }
+                ],
             }
         ]
     }
-    with patch("app.requests.post", return_value=mocked_response):
+
+    with patch("app.requests.post", return_value=mocked_response) as mocked_post:
         response = client.post(
             "/api/chat",
             json={"message": "Explain phishing", "history": []},
@@ -153,6 +166,15 @@ def test_successful_model_response(client):
     assert response.json["reply"] == (
         "Phishing is a deceptive attempt to steal information."
     )
+    assert response.json["sources"] == [
+        {"title": "CISA", "url": "https://www.cisa.gov/"}
+    ]
+    assert mocked_post.call_args.args[0] == (
+        "https://api.groq.com/openai/v1/responses"
+    )
+    payload = mocked_post.call_args.kwargs["json"]
+    assert "input" in payload
+    assert "messages" not in payload
 
 
 def test_identity_response_does_not_require_model(client):
@@ -170,7 +192,11 @@ def test_identity_response_does_not_require_model(client):
 def test_selected_language_is_added_to_system_prompt(client):
     mocked_response = Mock()
     mocked_response.json.return_value = {
-        "choices": [{"message": {"content": "Medaase."}}]
+        "output": [{
+            "type": "message",
+            "role": "assistant",
+            "content": [{"type": "output_text", "text": "Medaase.", "annotations": []}],
+        }]
     }
 
     with patch("app.requests.post", return_value=mocked_response) as mocked_post:
@@ -180,14 +206,18 @@ def test_selected_language_is_added_to_system_prompt(client):
         )
 
     assert response.status_code == 200
-    sent_messages = mocked_post.call_args.kwargs["json"]["messages"]
+    sent_messages = mocked_post.call_args.kwargs["json"]["input"]
     assert "Respond in Twi (Akan)" in sent_messages[0]["content"]
 
 
 def test_invalid_language_falls_back_to_english(client):
     mocked_response = Mock()
     mocked_response.json.return_value = {
-        "choices": [{"message": {"content": "Hello."}}]
+        "output": [{
+            "type": "message",
+            "role": "assistant",
+            "content": [{"type": "output_text", "text": "Hello.", "annotations": []}],
+        }]
     }
 
     with patch("app.requests.post", return_value=mocked_response) as mocked_post:
@@ -197,7 +227,7 @@ def test_invalid_language_falls_back_to_english(client):
         )
 
     assert response.status_code == 200
-    sent_messages = mocked_post.call_args.kwargs["json"]["messages"]
+    sent_messages = mocked_post.call_args.kwargs["json"]["input"]
     assert "Respond in English" in sent_messages[0]["content"]
 
 

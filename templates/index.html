@@ -27,6 +27,21 @@
             <div class="sidebar-label">YOUR CONVERSATIONS</div>
             <div class="history-list" id="historyList"></div>
 
+            <div class="sidebar-label">SAVED MEMORY</div>
+            <div id="memoryControls">
+                <label>
+                    <input type="checkbox" id="memoryEnabled">
+                    Use saved memories in chats
+                </label>
+                <p>Memories stay in this browser. Add only details you want Axiom AI to use.</p>
+                <label for="memoryInput">Add a memory</label>
+                <textarea id="memoryInput" maxlength="200" rows="2"
+                    placeholder="e.g. I prefer Python examples."></textarea>
+                <button type="button" id="saveMemory">Save memory</button>
+                <div id="memoryList" aria-live="polite"></div>
+                <button type="button" id="clearMemories">Delete all memories</button>
+            </div>
+
             <div class="sidebar-footer">
                 <div class="local-indicator"><span></span> Local model</div>
                 <p>Your chat history stays in this browser.</p>
