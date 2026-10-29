@@ -24,33 +24,31 @@
                 <span>＋</span> New chat
             </button>
 
-            <div class="sidebar-label">YOUR CONVERSATIONS</div>
-            <label for="conversationSearch" class="visually-hidden">Search conversations</label>
-            <input type="search" id="conversationSearch"
-                placeholder="Search conversations..." autocomplete="off"
-                aria-label="Search conversations">
-            <div class="history-list" id="historyList"></div>
+            <details class="sidebar-section history-section" open>
+                <summary class="sidebar-section-title">History</summary>
+                <label for="conversationSearch" class="visually-hidden">Search conversations</label>
+                <input type="search" id="conversationSearch"
+                    placeholder="Search conversations..." autocomplete="off"
+                    aria-label="Search conversations">
+                <div class="history-list" id="historyList"></div>
+            </details>
 
-            <div class="sidebar-label">SAVED MEMORY</div>
-            <div id="memoryControls">
-                <label>
-                    <input type="checkbox" id="memoryEnabled">
-                    Use saved memories in chats
-                </label>
-                <p>Memories stay in this browser. Add only details you want Axiom AI to use.</p>
-                <label for="memoryInput">Add a memory</label>
-                <textarea id="memoryInput" maxlength="200" rows="2"
-                    placeholder="e.g. I prefer Python examples."></textarea>
-                <button type="button" id="saveMemory">Save memory</button>
-                <div id="memoryList" aria-live="polite"></div>
-                <button type="button" id="clearMemories">Delete all memories</button>
-            </div>
+            <details class="sidebar-section extensions-section" open>
+                <summary class="sidebar-section-title">Extensions</summary>
+                <button type="button" class="extension-button" data-extension="web">
+                    <span class="extension-icon">⌕</span>
+                    <span>Web Search</span>
+                </button>
+                <button type="button" class="extension-button" data-extension="file">
+                    <span class="extension-icon">▤</span>
+                    <span>File Analysis</span>
+                </button>
+                <button type="button" class="extension-button" data-extension="code">
+                    <span class="extension-icon">&lt;/&gt;</span>
+                    <span>Code Assistant</span>
+                </button>
+            </details>
 
-            <div class="sidebar-footer">
-                <div class="local-indicator"><span></span> Local model</div>
-                <p>Your chat history stays in this browser.</p>
-                <button class="clear-history" id="clearHistory">Clear all history</button>
-            </div>
         </aside>
 
         <main class="main-panel">

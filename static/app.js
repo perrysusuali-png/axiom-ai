@@ -5,12 +5,6 @@ const elements = {
     newChat: document.getElementById("newChat"),
     historyList: document.getElementById("historyList"),
     conversationSearch: document.getElementById("conversationSearch"),
-    clearHistory: document.getElementById("clearHistory"),
-    memoryEnabled: document.getElementById("memoryEnabled"),
-    memoryInput: document.getElementById("memoryInput"),
-    saveMemory: document.getElementById("saveMemory"),
-    memoryList: document.getElementById("memoryList"),
-    clearMemories: document.getElementById("clearMemories"),
     welcome: document.getElementById("welcome"),
     messages: document.getElementById("messages"),
     chatForm: document.getElementById("chatForm"),
@@ -26,10 +20,6 @@ const elements = {
 };
 
 const STORAGE_KEY = "axiom-ai-conversations-v1";
-const MEMORY_STORAGE_KEY = "axiom-ai-memories-v1";
-const MEMORY_ENABLED_KEY = "axiom-ai-memory-enabled-v1";
-const MAX_MEMORIES = 10;
-const MAX_MEMORY_LENGTH = 200;
 const MAX_CONVERSATIONS = 30;
 const MAX_STORED_MESSAGES = 100;
 const MAX_HISTORY_MESSAGES = 12;
@@ -77,171 +67,6 @@ function saveConversations() {
         return false;
     }
 }
-
-function loadMemories() {
-    try {
-        const saved = JSON.parse(localStorage.getItem(MEMORY_STORAGE_KEY) || "[]");
-        if (!Array.isArray(saved)) return [];
-        return saved
-            .filter(item => typeof item === "string" && item.trim())
-            .map(item => item.trim().slice(0, MAX_MEMORY_LENGTH))
-            .slice(0, MAX_MEMORIES);
-    } catch {
-        return [];
-    }
-}
-
-function saveMemories() {
-    try {
-        localStorage.setItem(MEMORY_STORAGE_KEY, JSON.stringify(memories));
-        return true;
-    } catch {
-        showToast("Memory could not be saved in this browser.");
-        return false;
-    }
-}
-
-function loadMemoryEnabled() {
-    try {
-        return localStorage.getItem(MEMORY_ENABLED_KEY) === "true";
-    } catch {
-        return false;
-    }
-}
-
-let memories = loadMemories();
-let memoryEnabled = loadMemoryEnabled();
-
-function renderMemories() {
-    elements.memoryEnabled.checked = memoryEnabled;
-    elements.memoryList.replaceChildren();
-
-    if (!memories.length) {
-        const empty = document.createElement("p");
-        empty.textContent = "No saved memories yet.";
-        elements.memoryList.appendChild(empty);
-        return;
-    }
-
-    memories.forEach((memory, index) => {
-        const row = document.createElement("div");
-        const text = document.createElement("span");
-        text.textContent = memory;
-
-        const edit = document.createElement("button");
-        edit.type = "button";
-        edit.textContent = "Edit";
-        edit.setAttribute("aria-label", `Edit memory ${index + 1}`);
-        edit.addEventListener("click", () => {
-            const updated = window.prompt("Edit this memory:", memories[index]);
-            if (updated === null) return;
-
-            const value = updated.trim().slice(0, MAX_MEMORY_LENGTH);
-            if (!value) {
-                showToast("Memory cannot be empty. Use Delete to remove it.");
-                return;
-            }
-
-            if (memories.some((item, otherIndex) =>
-                otherIndex !== index && item.toLowerCase() === value.toLowerCase()
-            )) {
-                showToast("That memory is already saved.");
-                return;
-            }
-
-            const previous = memories[index];
-            memories[index] = value;
-            if (saveMemories()) {
-                renderMemories();
-                showToast("Memory updated.");
-            } else {
-                memories[index] = previous;
-            }
-        });
-
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.textContent = "Delete";
-        remove.setAttribute("aria-label", `Delete memory ${index + 1}`);
-        remove.addEventListener("click", () => {
-            if (!window.confirm("Delete this saved memory?")) return;
-
-            const previous = memories.slice();
-            memories.splice(index, 1);
-            if (saveMemories()) {
-                renderMemories();
-                showToast("Memory deleted.");
-            } else {
-                memories = previous;
-                renderMemories();
-            }
-        });
-
-        row.append(text, edit, remove);
-        elements.memoryList.appendChild(row);
-    });
-}
-
-elements.saveMemory.addEventListener("click", () => {
-    const value = elements.memoryInput.value.trim().slice(0, MAX_MEMORY_LENGTH);
-
-    if (!value) {
-        showToast("Enter a memory first.");
-        return;
-    }
-
-    if (memories.length >= MAX_MEMORIES) {
-        showToast("You can save up to 10 memories. Delete one first.");
-        return;
-    }
-
-    if (memories.some(item => item.toLowerCase() === value.toLowerCase())) {
-        showToast("That memory is already saved.");
-        return;
-    }
-
-    memories.push(value);
-    if (saveMemories()) {
-        elements.memoryInput.value = "";
-        renderMemories();
-        showToast("Memory saved in this browser.");
-    } else {
-        memories.pop();
-    }
-});
-
-elements.memoryEnabled.addEventListener("change", () => {
-    memoryEnabled = elements.memoryEnabled.checked;
-    try {
-        localStorage.setItem(MEMORY_ENABLED_KEY, String(memoryEnabled));
-        showToast(memoryEnabled
-            ? "Saved memories will be included in chat requests."
-            : "Saved memories are disabled for chat requests.");
-    } catch {
-        memoryEnabled = false;
-        elements.memoryEnabled.checked = false;
-        showToast("Memory preference could not be saved.");
-    }
-});
-
-elements.clearMemories.addEventListener("click", () => {
-    if (!memories.length) {
-        showToast("There are no saved memories to delete.");
-        return;
-    }
-
-    if (!window.confirm("Delete all saved memories from this browser?")) return;
-
-    const previous = memories;
-    memories = [];
-    if (saveMemories()) {
-        renderMemories();
-        showToast("All saved memories deleted.");
-    } else {
-        memories = previous;
-        renderMemories();
-    }
-});
 
 function makeId() {
     if (window.crypto && typeof window.crypto.randomUUID === "function") {
@@ -717,8 +542,7 @@ async function sendMessage(text) {
             body: JSON.stringify({
                 message,
                 history: previousMessages,
-                language: selectedLanguage,
-                memories: memoryEnabled ? memories : []
+                language: selectedLanguage
             })
         });
 
@@ -837,7 +661,6 @@ function closeSidebar() {
     elements.sidebar.classList.remove("open");
 }
 
-renderMemories();
 elements.languageSelect.value = selectedLanguage;
 elements.languageSelect.addEventListener("change", () => {
     const nextLanguage = elements.languageSelect.value;
@@ -868,26 +691,21 @@ elements.messageInput.addEventListener("keydown", event => {
 });
 
 elements.conversationSearch.addEventListener("input", renderHistory);
-elements.newChat.addEventListener("click", createConversation);
 
-elements.clearHistory.addEventListener("click", () => {
-    if (!conversations.length) {
-        showToast("There is no saved history to clear.");
-        return;
-    }
+document.querySelectorAll("[data-extension]").forEach(button => {
+    button.addEventListener("click", () => {
+        const prompts = {
+            web: "Help me research this topic. If live web search is unavailable, tell me clearly and help me identify reliable sources: ",
+            file: "Help me analyze the following file or its contents. Summarize it, identify important details, and explain any limitations: ",
+            code: "Act as my code assistant. Review the code I provide, explain issues, and suggest a safe improvement: "
+        };
 
-    if (!window.confirm("Clear all Axiom AI conversations saved in this browser?")) {
-        return;
-    }
-
-    conversations = [];
-    activeConversationId = null;
-    saveConversations();
-    renderHistory();
-    renderConversation();
-    clearError();
-    showToast("Browser conversation history cleared.");
+        elements.messageInput.value = prompts[button.dataset.extension] || "";
+        elements.messageInput.focus();
+        elements.messageInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
 });
+elements.newChat.addEventListener("click", createConversation);
 
 elements.openSidebar.addEventListener("click", () => {
     elements.sidebar.classList.add("open");

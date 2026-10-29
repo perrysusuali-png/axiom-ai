@@ -1743,3 +1743,99 @@ select:focus-visible {
     }
 }
 
+
+
+/* Sidebar navigation sections */
+.sidebar-section {
+    min-width: 0;
+    margin-top: 22px;
+}
+
+.sidebar-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 8px 12px;
+    color: #d7dced;
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+    list-style: none;
+}
+
+.sidebar-section-title::-webkit-details-marker {
+    display: none;
+}
+
+.sidebar-section-title::after {
+    content: "+";
+    color: #a78bfa;
+    font-size: 17px;
+}
+
+.sidebar-section[open] > .sidebar-section-title::after {
+    content: "−";
+}
+
+.history-section #conversationSearch {
+    box-sizing: border-box;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.history-section .history-list {
+    max-height: 30vh;
+}
+
+.extensions-section {
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.extension-button {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    min-height: 42px;
+    margin: 3px 0;
+    padding: 9px 10px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease;
+}
+
+.extension-button:hover,
+.extension-button:focus-visible {
+    border-color: rgba(167, 139, 250, .3);
+    background: rgba(167, 139, 250, .09);
+}
+
+.extension-icon {
+    display: grid;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    border-radius: 9px;
+    background: rgba(53, 230, 154, .1);
+    color: #35e69a;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.extension-button:nth-of-type(2) .extension-icon {
+    background: rgba(167, 139, 250, .12);
+    color: #b9a5ff;
+}
+
+@media (max-width: 760px) {
+    .history-section .history-list {
+        max-height: 24vh;
+    }
+}
